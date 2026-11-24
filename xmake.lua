@@ -34,7 +34,6 @@ if not os.isdir(sdkroot) then
 end
 
 local kmodinfo = path.join(root, "build", "KModInfo.c")
-os.mkdir(path.directory(kmodinfo))
 io.writefile(kmodinfo, string.format([[
 #include <libkern/libkern.h>
 #include <mach/mach_types.h>

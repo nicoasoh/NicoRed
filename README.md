@@ -134,6 +134,7 @@ git clone --branch 1.7.2 https://github.com/acidanthera/Lilu.git .ci-deps/Lilu
 git clone https://github.com/acidanthera/MacKernelSDK.git .ci-deps/MacKernelSDK
 git -C .ci-deps/MacKernelSDK checkout 3f750085caa17ec3a7880f11c11bf4f48cd6a164
 
+mkdir -p build
 export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 xmake f -p macosx -a x86_64 -m release -y
 xmake -y

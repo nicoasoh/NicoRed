@@ -71,6 +71,7 @@ jobs:
           export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
           export CC="$(xcrun --find clang)"
           export CXX="$(xcrun --find clang++)"
+          mkdir -p build
           xmake f -p macosx -a x86_64 -m release -y
           xmake -y
 
