@@ -71,8 +71,6 @@ void Backlight::init()
     auto bkltArg = BaseDeviceInfo::get().modelType == WIOKit::ComputerModel::ComputerLaptop;
     PE_parse_boot_argn("AMDBacklight", &bkltArg, sizeof(bkltArg));
     if (!bkltArg) { return; }
-    this->initialized = true;
-
     lilu.onKextLoadForce(&kextAppleBacklight);
     lilu.onKextLoadForce(&kextAppleMCCSControl);
 
@@ -85,6 +83,7 @@ void Backlight::init()
     this->dispNotif =
         IOService::addMatchingNotification(gIOFirstMatchNotification, matching, OnAppleBacklightDisplayLoad, nullptr);
     SYSLOG_COND(this->dispNotif == nullptr, "Backlight", "Failed to register notification");
+    this->initialized = this->dispNotif != nullptr;
     OSSafeReleaseNULL(matching);
 }
 
