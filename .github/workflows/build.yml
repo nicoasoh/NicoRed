@@ -1,0 +1,135 @@
+name: NicoRed Build
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: Build NicoRed
+    runs-on: macos-latest
+    outputs:
+      version: ${{ steps.set-version.outputs.value }}
+    steps:
+      - name: Check out NicoRed
+        uses: actions/checkout@v4
+
+      - name: Check out Lilu headers and plugin entry point
+        uses: actions/checkout@v4
+        with:
+          repository: acidanthera/Lilu
+          ref: e4748cc081bf060302c7d3c44a643ce1d11b7e1d
+          path: .ci-deps/Lilu
+          persist-credentials: false
+
+      - name: Check out macOS kernel SDK
+        uses: actions/checkout@v4
+        with:
+          repository: acidanthera/MacKernelSDK
+          ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
+          path: .ci-deps/MacKernelSDK
+          persist-credentials: false
+
+      - name: Install xmake
+        run: |
+          set -euo pipefail
+          brew install xmake
+
+      - name: Set build version
+        id: set-version
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="$(tr -d '[:space:]' < VERSION)"
+          fi
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.]+)?$ ]] || {
+            echo "Invalid NicoRed version: $VERSION" >&2
+            exit 1
+          }
+          echo "NICORED_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build Release Kext
+        run: |
+          set -euo pipefail
+          export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
+          export CC="$(xcrun --find clang)"
+          export CXX="$(xcrun --find clang++)"
+          xmake f -p macosx -a x86_64 -m release -y
+          xmake -y
+
+      - name: Validate and package Kext
+        run: |
+          set -euo pipefail
+          scripts/package-kext.sh "$NICORED_VERSION"
+
+      - name: Write build summary
+        if: always()
+        env:
+          BUILD_RESULT: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          SUMMARY="build/artifacts/NicoRed-${NICORED_VERSION:-unavailable}-BUILD-SUMMARY.md"
+          mkdir -p "$(dirname "$SUMMARY")"
+          {
+            echo "## NicoRed build"
+            echo
+            echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- Branch/tag: \`$GITHUB_REF_NAME\`"
+            echo "- Version: \`${NICORED_VERSION:-unavailable}\`"
+            echo "- Date (UTC): \`$(date -u '+%Y-%m-%d %H:%M:%S')\`"
+            echo "- Result: **$BUILD_RESULT**"
+          } > "$SUMMARY"
+          cat "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NicoRed-${{ steps.set-version.outputs.value }}
+          path: |
+            build/artifacts/NicoRed-${{ steps.set-version.outputs.value }}.zip
+            build/artifacts/NicoRed-${{ steps.set-version.outputs.value }}-BUILD-SUMMARY.md
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: NicoRed-${{ needs.build.outputs.version }}
+          path: artifact
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh release create "$GITHUB_REF_NAME" \
+            "artifact/NicoRed-${{ needs.build.outputs.version }}.zip" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            --verify-tag \
+            --repo "$GITHUB_REPOSITORY"

@@ -53,9 +53,42 @@ $RECYCLE.BIN/
 # Build folder
 build/
 
+# CI-only dependency checkouts
+.ci-deps/
+
 # Compile commands for LSP
 compile_commands.json
 
-### clangd
-# Cache
+### Editors and IDEs
+.vscode/
+.idea/
 .cache/
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+*.swp
+*.swo
+__pycache__/
+*.py[cod]
+
+### Generated files
+*.o
+*.a
+*.dylib
+*.dSYM/
+*.log
+*.tmp
+*.bak
+*.kext/
+*.zip
+
+### Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.key
+*.mobileprovision
+
+### clangd

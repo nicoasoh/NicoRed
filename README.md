@@ -126,9 +126,20 @@ NicoRed wird schrittweise und modular entwickelt.
 
 ## Build
 
-Die Entwicklungsumgebung und die benötigten Abhängigkeiten werden während der Entwicklung definiert.
+Für den Build werden macOS, Xcode mit dem macOS SDK, `xmake` und Git benötigt. Die benötigten Lilu- und Kernel-SDK-Dateien werden getrennt und in einem ignorierten Verzeichnis innerhalb des Projekts abgelegt.
 
-Eine offizielle Build-Anleitung wird veröffentlicht, sobald ein reproduzierbarer Build-Prozess etabliert wurde.
+```sh
+mkdir -p .ci-deps
+git clone --branch 1.7.2 https://github.com/acidanthera/Lilu.git .ci-deps/Lilu
+git clone https://github.com/acidanthera/MacKernelSDK.git .ci-deps/MacKernelSDK
+git -C .ci-deps/MacKernelSDK checkout 3f750085caa17ec3a7880f11c11bf4f48cd6a164
+
+export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
+xmake f -p macosx -a x86_64 -m release -y
+xmake -y
+```
+
+Der fertige Bundle-Ordner wird unter `build/NicoRed.kext` erstellt. Die Projektversion steht in `VERSION`; `NICORED_VERSION` kann für einen anders versionierten Build gesetzt werden. GitHub Actions führt denselben Release-Build aus und validiert das Kext-Bundle vor dem Packaging.
 
 ---
 

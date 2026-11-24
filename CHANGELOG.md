@@ -14,6 +14,7 @@ und sonstigen Anpassungen gruppiert.
 - Initial development structure for NicoRed.
 - Establishment of an independent project identity.
 - Initial documentation and development planning.
+- Reproducible macOS Release builds and GitHub Actions packaging.
 
 ### Changed
 - Project documentation rewritten and reorganized.
