@@ -193,6 +193,8 @@ void NicoRed::processPatcher()
             this->attributes.setPicasso();
         } break;
         case 0x15DD: {
+            // Raven Ridge / Picasso device ID used by the laptop's Vega iGPU.
+            this->attributes.setPicasso();
         } break;
         case 0x164C:
         case 0x1636: {
