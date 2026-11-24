@@ -1,7 +1,8 @@
 set_project("NicoRed")
 local version = os.getenv("NICORED_VERSION")
 if not version or version == "" then
-	version = io.readfile("VERSION"):gsub("%s+", "")
+	local output = os.iorunv("cat", {"VERSION"})
+	version = output:gsub("%s+", "")
 end
 if not version:match("^%d+%.%d+%.%d+[%w%.%-]*$") then
 	os.raise("NICORED_VERSION must be a semantic version")
@@ -33,25 +34,6 @@ if not os.isdir(sdkroot) then
 	os.raise("SDKROOT does not point to an installed macOS SDK")
 end
 
-local kmodinfo = path.join(root, "build", "KModInfo.c")
-io.writefile(kmodinfo, string.format([[
-#include <libkern/libkern.h>
-#include <mach/mach_types.h>
-#include <mach/kmod.h>
-
-__private_extern__ kern_return_t NicoRed_kern_start(kmod_info_t *ki, void *data);
-__private_extern__ kern_return_t NicoRed_kern_stop(kmod_info_t *ki, void *data);
-__private_extern__ kern_return_t _start(kmod_info_t *ki, void *data);
-__private_extern__ kern_return_t _stop(kmod_info_t *ki, void *data);
-
-__attribute__((visibility("default")))
-KMOD_EXPLICIT_DECL(org.nicoasoh.NicoRed, "%s", _start, _stop)
-
-__private_extern__ kmod_start_func_t *_realmain = NicoRed_kern_start;
-__private_extern__ kmod_stop_func_t *_antimain = NicoRed_kern_stop;
-__private_extern__ int _kext_apple_cc = __APPLE_CC__;
-]], version))
-
 target("NicoRed")
 	set_kind("binary")
 	set_targetdir(path.join(root, "build", "bin"))
@@ -64,10 +46,10 @@ target("NicoRed")
 
 	add_files("NicoRed/PenguinWizardry/**.cpp")
 	add_files("NicoRed/**.cpp")
+	add_files("NicoRed/KModInfo.c")
 	add_files(path.join(lilu, "Lilu", "Library", "plugin_start.cpp"))
 	add_files(path.join(kernel_sdk, "Library", "kmod", "c_start.c"))
 	add_files(path.join(kernel_sdk, "Library", "kmod", "c_stop.c"))
-	add_files(kmodinfo)
 	add_includedirs("NicoRed", path.join(lilu, "Lilu"), path.join(lilu, "Lilu", "PrivateHeaders"),
 		path.join(kernel_sdk, "Headers"))
 	add_linkdirs(path.join(kernel_sdk, "Library", "x86_64"),
