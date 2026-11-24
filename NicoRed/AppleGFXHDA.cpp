@@ -95,6 +95,7 @@ void* AppleGFXHDA::wrapCreateAppleHDAFunctionGroup(void* devId)
     const auto vendorID = getMember<UInt16>(devId, 0x2);
     const auto deviceID = getMember<UInt32>(devId, 0x8);
     if (vendorID == AMDVendorID && (deviceID == RavenHDMIDeviceID || deviceID == RenoirHDMIDeviceID)) {
+        if (singleton().orgFunctionGroupTahiti == nullptr) { return nullptr; }
         return singleton().orgFunctionGroupTahiti->alloc();
     }
     if (singleton().orgCreateAppleHDAFunctionGroup == 0) { return nullptr; }
@@ -107,6 +108,7 @@ void* AppleGFXHDA::wrapCreateAppleHDAWidget(void* devId)
     auto vendorID = getMember<UInt16>(devId, 0x2);
     auto deviceID = getMember<UInt32>(devId, 0x8);
     if (vendorID == AMDVendorID && (deviceID == RavenHDMIDeviceID || deviceID == RenoirHDMIDeviceID)) {
+        if (singleton().orgWidget1002AAA0 == nullptr) { return nullptr; }
         return singleton().orgWidget1002AAA0->alloc();
     }
     if (singleton().orgCreateAppleHDAWidget == 0) { return nullptr; }

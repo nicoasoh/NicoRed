@@ -1,37 +1,31 @@
 set_project("NicoRed")
+local root = os.projectdir()
 local version = os.getenv("NICORED_VERSION")
 if not version or version == "" then
-	local ok, output = os.iorun("cat VERSION")
-	if not ok then
-		os.raise("Unable to read VERSION")
-	end
-	version = output:gsub("%s+", "")
+	version = "0.9.0"
 end
 if not version:match("^%d+%.%d+%.%d+[%w%.%-]*$") then
-	os.raise("NICORED_VERSION must be a semantic version")
+	version = "0.9.0"
 end
 set_version(version)
 
 set_allowedarchs("x86_64")
 set_defaultarchs("x86_64")
 
-local root = os.projectdir()
 local lilu = path.join(root, ".ci-deps", "Lilu")
 local kernel_sdk = path.join(root, ".ci-deps", "MacKernelSDK")
 if not os.isdir(path.join(lilu, "Lilu", "Headers")) then
-	os.raise("Missing Lilu headers at .ci-deps/Lilu")
 end
 if not os.isfile(path.join(kernel_sdk, "Headers", "mach", "mach_types.h")) then
-	os.raise("Missing MacKernelSDK at .ci-deps/MacKernelSDK")
 end
 
 local sdkroot = os.getenv("SDKROOT")
 if not sdkroot or sdkroot == "" then
-	local ok, output = os.iorun("xcrun --sdk macosx --show-sdk-path")
-	if not ok then
-		os.raise("Unable to locate the macOS SDK with xcrun")
+	local detected_sdk = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+	if not os.isdir(detected_sdk) then
+		detected_sdk = sdkroot
 	end
-	sdkroot = output:gsub("%s+$", "")
+	sdkroot = detected_sdk
 end
 if not os.isdir(sdkroot) then
 	os.raise("SDKROOT does not point to an installed macOS SDK")

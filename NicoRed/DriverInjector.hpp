@@ -10,6 +10,7 @@ class DriverInjector
     {
         const char* identifier{nullptr};
         OSArray*    personalities{nullptr};
+        bool        valid{false};
 
         Driver(const char* identifier, const char* xml, const size_t xml_size) :
             identifier{identifier}
@@ -17,12 +18,19 @@ class DriverInjector
             OSString*   errStr           = nullptr;
             auto* const dataUnserialized = OSUnserializeXML(xml, xml_size, &errStr);
 
-            PANIC_COND(dataUnserialized == nullptr, "DriverInjector", "BUG: Failed to unserialise XML for `%s`: `%s`",
+            if (dataUnserialized == nullptr) {
+                SYSLOG("DriverInjector", "Failed to unserialize XML for `%s`: `%s`",
                        identifier, errStr == nullptr ? "(null)" : errStr->getCStringNoCopy());
+                return;
+            }
 
             this->personalities = OSDynamicCast(OSArray, dataUnserialized);
-            PANIC_COND(this->personalities == nullptr, "DriverInjector", "BUG: XML for `%s` is not an array!",
-                       identifier);
+            if (this->personalities == nullptr) {
+                SYSLOG("DriverInjector", "XML for `%s` is not an array", identifier);
+                dataUnserialized->release();
+                return;
+            }
+            this->valid = true;
         }
 
         template<const size_t N>
@@ -30,7 +38,10 @@ class DriverInjector
             Driver(identifier, xml, N)
         { }
 
-        ~Driver() { this->personalities->release(); }
+        ~Driver()
+        {
+            if (this->personalities != nullptr) { this->personalities->release(); }
+        }
     };
 
     mach_vm_address_t orgAddDrivers{0};

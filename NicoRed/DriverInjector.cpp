@@ -40,12 +40,15 @@ void DriverInjector::processPatcher(KernelPatcher& patcher)
 {
     KernelPatcher::RouteRequest request{"__ZN11IOCatalogue10addDriversEP7OSArrayb", wrapAddDrivers,
                                         this->orgAddDrivers};
-    PANIC_COND(!patcher.routeMultipleLong(KernelPatcher::KernelID, &request, 1), "DriverInjector",
-               "Failed to route addDrivers");
+    if (!patcher.routeMultipleLong(KernelPatcher::KernelID, &request, 1)) {
+        SYSLOG("DriverInjector", "Failed to route addDrivers");
+        patcher.clearError();
+    }
 }
 
 bool DriverInjector::wrapAddDrivers(void* const self, OSArray* const array, const bool doNubMatching)
 {
+    if (self == nullptr || array == nullptr || singleton().orgAddDrivers == 0) { return false; }
     UInt32 driverCount = array->getCount();
     for (UInt32 driverIndex = 0; driverIndex < driverCount; driverIndex += 1) {
         OSObject* object = array->getObject(driverIndex);
@@ -60,6 +63,7 @@ bool DriverInjector::wrapAddDrivers(void* const self, OSArray* const array, cons
                                                                                            arrsize(singleton().drivers);
         for (size_t identifierIndex = 0; identifierIndex < toInjectCount; identifierIndex += 1) {
             auto& driver = singleton().drivers[identifierIndex];
+            if (!driver.valid) { continue; }
 
             if ((singleton().matchedDrivers & getBit(identifierIndex)) != 0
                 || !bundleIdentifier->isEqualTo(driver.identifier))

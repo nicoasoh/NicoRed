@@ -20,8 +20,11 @@ static RuntimeVFTBase mcVft;
 void PenguinWizardry::RuntimeMCManager::processPatcher(KernelPatcher& patcher)
 {
     KernelPatcher::RouteRequest request{"__ZN11OSMetaClass11postModLoadEPv", wrapPostModLoad, this->orgPostModLoad};
-    PANIC_COND(!patcher.routeMultiple(KernelPatcher::KernelID, &request, 1), "RuntimeMC",
-               "Failed to route `postModLoad`");
+    if (!patcher.routeMultiple(KernelPatcher::KernelID, &request, 1)) {
+        SYSLOG("RuntimeMC", "Failed to route `postModLoad`");
+        patcher.clearError();
+        return;
+    }
     mcVft.init(MetaClassVT + 2);
 }
 
