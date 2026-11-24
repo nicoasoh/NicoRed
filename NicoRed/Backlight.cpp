@@ -66,9 +66,12 @@ Backlight::Backlight()
 
 void Backlight::init()
 {
+    if (this->initialized) { return; }
+
     auto bkltArg = BaseDeviceInfo::get().modelType == WIOKit::ComputerModel::ComputerLaptop;
     PE_parse_boot_argn("AMDBacklight", &bkltArg, sizeof(bkltArg));
     if (!bkltArg) { return; }
+    this->initialized = true;
 
     lilu.onKextLoadForce(&kextAppleBacklight);
     lilu.onKextLoadForce(&kextAppleMCCSControl);
