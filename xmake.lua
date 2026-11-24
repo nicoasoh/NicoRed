@@ -55,7 +55,8 @@ target("NicoRed")
 	add_linkdirs(path.join(kernel_sdk, "Library", "x86_64"),
 		path.join(sdkroot, "System", "Library", "Frameworks", "Kernel.framework", "Versions", "A", "Libraries"))
 	add_links("kmod", "kmodc++", "cc_kext")
-	add_ldflags("-Wl,-kext", "-Wl,-undefined,dynamic_lookup", "-mmacosx-version-min=10.15", "-static", "-nostdlib")
+	add_ldflags("-Wl,-kext", {force = true})
+	add_ldflags("-Wl,-undefined,dynamic_lookup", "-mmacosx-version-min=10.15", "-static", "-nostdlib")
 
 	after_build(function (build_target)
 		os.execv("python3", {

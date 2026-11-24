@@ -21,7 +21,7 @@ defaults:
 jobs:
   build:
     name: Build NicoRed
-    runs-on: macos-latest
+    runs-on: macos-15
     outputs:
       version: ${{ steps.set-version.outputs.value }}
     steps:
