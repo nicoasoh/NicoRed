@@ -1,0 +1,12 @@
+
+
+#pragma once
+#include <Headers/kern_patcher.hpp>
+
+extern KernelPatcher::KextInfo kextRadeonX6000Framebuffer;
+extern KernelPatcher::KextInfo kextRadeonX5000HWLibs;
+extern KernelPatcher::KextInfo kextRadeonX5000;
+extern KernelPatcher::KextInfo kextAppleBacklight;
+extern KernelPatcher::KextInfo kextAppleMCCSControl;
+extern KernelPatcher::KextInfo kextAGDP;
+extern KernelPatcher::KextInfo kextAppleGFXHDA;
