@@ -3,7 +3,9 @@ local version = os.getenv("NICORED_VERSION")
 if not version or version == "" then
 	version = io.readfile("VERSION"):gsub("%s+", "")
 end
-assert(version:match("^%d+%.%d+%.%d+[%w%.%-]*$"), "NICORED_VERSION must be a semantic version")
+if not version:match("^%d+%.%d+%.%d+[%w%.%-]*$") then
+	os.raise("NICORED_VERSION must be a semantic version")
+end
 set_version(version)
 
 set_allowedarchs("x86_64")
@@ -12,16 +14,24 @@ set_defaultarchs("x86_64")
 local root = os.projectdir()
 local lilu = path.join(root, ".ci-deps", "Lilu")
 local kernel_sdk = path.join(root, ".ci-deps", "MacKernelSDK")
-assert(os.isdir(path.join(lilu, "Lilu", "Headers")), "Missing Lilu headers at .ci-deps/Lilu")
-assert(os.isfile(path.join(kernel_sdk, "Headers", "mach", "mach_types.h")), "Missing MacKernelSDK at .ci-deps/MacKernelSDK")
+if not os.isdir(path.join(lilu, "Lilu", "Headers")) then
+	os.raise("Missing Lilu headers at .ci-deps/Lilu")
+end
+if not os.isfile(path.join(kernel_sdk, "Headers", "mach", "mach_types.h")) then
+	os.raise("Missing MacKernelSDK at .ci-deps/MacKernelSDK")
+end
 
 local sdkroot = os.getenv("SDKROOT")
 if not sdkroot or sdkroot == "" then
 	local output, _, code = os.iorunv("xcrun", {"--sdk", "macosx", "--show-sdk-path"})
-	assert(code == 0, "Unable to locate the macOS SDK with xcrun")
+	if code ~= 0 then
+		os.raise("Unable to locate the macOS SDK with xcrun")
+	end
 	sdkroot = output:gsub("%s+$", "")
 end
-assert(os.isdir(sdkroot), "SDKROOT does not point to an installed macOS SDK")
+if not os.isdir(sdkroot) then
+	os.raise("SDKROOT does not point to an installed macOS SDK")
+end
 
 local kmodinfo = path.join(root, "build", "KModInfo.c")
 os.mkdir(path.directory(kmodinfo))
