@@ -30,7 +30,7 @@ static const char* bootargDebug[] = {"-NicoRedDebug", "-NRedDebug"};
 static const char* bootargBeta[]  = {"-NicoRedBeta", "-NRedBeta"};
 
 PluginConfiguration ADDPR(config){
-    xStringify(PRODUCT_NAME),
+    "NicoRed",
     parseModuleVersion(xStringify(MODULE_VERSION)),
     LiluAPI::AllowNormal | LiluAPI::AllowInstallerRecovery | LiluAPI::AllowSafeMode,
     bootargOff,

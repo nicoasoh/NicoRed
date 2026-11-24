@@ -38,7 +38,7 @@ target("NicoRed")
 	set_kind("binary")
 	set_targetdir(path.join(root, "build", "bin"))
 	set_languages("cxx23")
-	add_defines("KERNEL", "PRODUCT_NAME=NicoRed", "MODULE_VERSION=" .. version)
+	add_defines("KERNEL", "PRODUCT_NAME=NicoRedPlugin", "MODULE_VERSION=" .. version)
 	add_cflags("-fapple-kext", "-mkernel", "-mmacosx-version-min=10.15", "-fno-builtin", "-nostdlib",
 		"-Wno-stdlibcxx-not-found")
 	add_cxflags("-fapple-kext", "-mkernel", "-fno-builtin", "-fno-exceptions", "-fno-rtti",
