@@ -43,8 +43,6 @@ void NicoRed::init()
     SYSLOG("NicoRed", "| Change the world for the better.                                |");
     SYSLOG("NicoRed", "|-----------------------------------------------------------------|");
 
-    Backlight::singleton().init();
-
     lilu.onKextLoadForce(&kextRadeonX6000Framebuffer);
     lilu.onKextLoadForce(&kextRadeonX5000HWLibs);
     lilu.onKextLoadForce(&kextRadeonX5000);
@@ -56,6 +54,7 @@ void NicoRed::init()
         {
             singleton().processPatcher();
             if (singleton().hardwareSupported) {
+                Backlight::singleton().init();
                 DriverInjector::singleton().processPatcher(patcher);
                 PenguinWizardry::RuntimeMCManager::singleton().processPatcher(patcher);
             }
