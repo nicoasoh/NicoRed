@@ -37,7 +37,14 @@ NicoRed& NicoRed::singleton() { return moduleInstance; }
 
 void NicoRed::init()
 {
+    bool picassoSafeMode = false;
+    PE_parse_boot_argn("NicoRedPicassoSafe", &picassoSafeMode, sizeof(picassoSafeMode));
     SYSLOG("NicoRed", "NicoRed: startup - registering AMD GPU hooks");
+    if (picassoSafeMode) {
+        SYSLOG("NicoRed", "Picasso safe-debug mode enabled: all GPU patch hooks are skipped");
+        SYSLOG("NicoRed", "Safe-debug mode exit; no Radeon kext hooks registered");
+        return;
+    }
     SYSLOG("NicoRed", "|-----------------------------------------------------------------|");
     SYSLOG("NicoRed", "| Copyright 2022-2026 ChefKiss.                                   |");
     SYSLOG("NicoRed", "| If you've paid for this, you've been scammed. Ask for a refund! |");
