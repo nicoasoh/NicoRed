@@ -37,9 +37,9 @@ target("NicoRed")
 	set_languages("cxx23")
 	add_defines("KERNEL", "PRODUCT_NAME=NicoRedPlugin", "MODULE_VERSION=" .. version)
 	add_cflags("-fapple-kext", "-mkernel", "-mmacosx-version-min=10.15", "-fno-builtin", "-nostdlib",
-		"-Wno-stdlibcxx-not-found")
+		"-Wno-stdlibcxx-not-found", "-Wno-c2x-extensions")
 	add_cxflags("-fapple-kext", "-mkernel", "-fno-builtin", "-fno-exceptions", "-fno-rtti",
-		"-mmacosx-version-min=10.15", "-nostdlib", "-Wno-stdlibcxx-not-found", "-Wno-c23-extensions")
+		"-mmacosx-version-min=10.15", "-nostdlib", "-Wno-stdlibcxx-not-found")
 
 	add_files("NicoRed/PenguinWizardry/**.cpp")
 	add_files("NicoRed/**.cpp")
@@ -55,6 +55,13 @@ target("NicoRed")
 	add_ldflags("-Wl,-kext", {force = true})
 	add_ldflags("-Wl,-undefined,dynamic_lookup", "-mmacosx-version-min=10.15", "-static", "-nostdlib")
 
+	before_build(function (build_target)
+		os.execv("python3", {
+			path.join(root, "scripts", "generate-personality-includes.py"),
+			root,
+			path.join(root, "build", "generated-personality-inc")
+		})
+	end)
 	after_build(function (build_target)
 		os.execv("python3", {
 			path.join(root, "scripts", "assemble-kext.py"),
