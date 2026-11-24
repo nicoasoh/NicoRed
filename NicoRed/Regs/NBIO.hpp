@@ -1,0 +1,33 @@
+// Copyright (C) 2024-2026  ChefKiss.
+//
+// Licensed under the ChefKiss Open Knowledge License version 1.
+//
+// This work is licensed to you under the terms of the ChefKiss Open Knowledge
+// License, either version 1 of the License, or (at your option) any later
+// version published by ChefKiss.
+//
+// This work may not be used to train or develop artificial intelligence,
+// and may not be used with artificial intelligence in any other way. See
+// the ChefKiss Open Knowledge License for details.
+//
+// This work is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// ChefKiss Open Knowledge License for more details.
+//
+// You should have received a copy of the ChefKiss Open Knowledge License
+// along with this work.  If not, see https://git.chefkiss.dev/ChefKiss/OpenKnowledge/raw/branch/master/LICENSE-v1.md.
+
+#pragma once
+#include <IOKit/IOTypes.h>
+
+//-------- Base Index 0 --------//
+
+constexpr UInt32 PCIE_INDEX2 = 0xE;
+constexpr UInt32 PCIE_DATA2  = 0xF;
+
+//-------- Base Index 2 --------//
+
+constexpr UInt32 RCC_DEV0_EPF0_STRAP0                  = 0xF;
+constexpr UInt8  RCC_DEV0_EPF0_STRAP0_ATI_REV_ID_SHIFT = 0x18;
+constexpr UInt32 RCC_DEV0_EPF0_STRAP0_ATI_REV_ID_MASK  = 0xF000000;
