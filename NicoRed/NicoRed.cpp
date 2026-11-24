@@ -37,7 +37,8 @@ NicoRed& NicoRed::singleton() { return moduleInstance; }
 
 void NicoRed::init()
 {
-    SYSLOG("NicoRed", "|-----------------------------------------------------------------|");
+    SYSLOG("NicoRed", "NicoRed: startup - registering AMD GPU hooks");
+    SYSLOG("NicoRed", "|-----------------------------------------------------------------|")
     SYSLOG("NicoRed", "| Copyright 2022-2026 ChefKiss.                                   |");
     SYSLOG("NicoRed", "| If you've paid for this, you've been scammed. Ask for a refund! |");
     SYSLOG("NicoRed", "| Change the world for the better.                                |");
@@ -86,6 +87,7 @@ void NicoRed::hwLateInit()
         return;
     }
 
+    SYSLOG("NicoRed", "Hardware init: enabling PCI memory and bus mastering");
     this->iGPU->setMemoryEnable(true);
     this->iGPU->setBusMasterEnable(true);
 
@@ -109,6 +111,7 @@ void NicoRed::hwLateInit()
         return;
     }
     this->rmmioAvailable = true;
+    SYSLOG("NicoRed", "Hardware init: RMMIO BAR5 mapped (length=0x%llX)", this->rmmio->getLength());
 
     this->fbOffset    = static_cast<UInt64>(this->readReg32(GC_BASE_0 + MC_VM_FB_OFFSET) & 0xFFFFFF) << 24;
     this->devRevision = (this->readReg32(NBIO_BASE_2 + RCC_DEV0_EPF0_STRAP0) & RCC_DEV0_EPF0_STRAP0_ATI_REV_ID_MASK)
@@ -137,6 +140,9 @@ void NicoRed::hwLateInit()
         }
     }
 
+    SYSLOG("NicoRed", "Init complete: deviceID=0x%X pciRevision=0x%X devRevision=0x%X enumRevision=0x%X fbOffset=0x%llX Picasso=%s",
+           this->deviceID, this->pciRevision, this->devRevision, this->enumRevision, this->fbOffset,
+           this->attributes.isPicasso() ? "yes" : "no");
     DBGLOG("NicoRed", "deviceID = 0x%X", this->deviceID);
     DBGLOG("NicoRed", "pciRevision = 0x%X", this->pciRevision);
     DBGLOG("NicoRed", "fbOffset = 0x%llX", this->fbOffset);
@@ -193,8 +199,10 @@ void NicoRed::processPatcher()
             this->attributes.setPicasso();
         } break;
         case 0x15DD: {
-            // Raven Ridge / Picasso device ID used by the laptop's Vega iGPU.
+            // Picasso/Raven Ridge mobile Vega device ID.
             this->attributes.setPicasso();
+            this->enumRevision = 0x41;
+            SYSLOG("NicoRed", "Detected Picasso/Raven Ridge iGPU (PCI ID 0x15DD); enumRevision=0x41");
         } break;
         case 0x164C:
         case 0x1636: {
@@ -214,6 +222,7 @@ void NicoRed::processPatcher()
     }
     this->pciRevision = static_cast<UInt8>(WIOKit::readPCIConfigValue(this->iGPU, WIOKit::kIOPCIConfigRevisionID));
     this->hardwareSupported = true;
+    SYSLOG("NicoRed", "AMD iGPU accepted: deviceID=0x%X pciRevision=0x%X", this->deviceID, this->pciRevision);
 
     char name[128];
     for (size_t i = 0, ii = 0; i < devInfo->videoExternal.size(); i++) {
