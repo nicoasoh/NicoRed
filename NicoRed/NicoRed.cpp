@@ -38,7 +38,7 @@ NicoRed& NicoRed::singleton() { return moduleInstance; }
 void NicoRed::init()
 {
     SYSLOG("NicoRed", "NicoRed: startup - registering AMD GPU hooks");
-    SYSLOG("NicoRed", "|-----------------------------------------------------------------|")
+    SYSLOG("NicoRed", "|-----------------------------------------------------------------|");
     SYSLOG("NicoRed", "| Copyright 2022-2026 ChefKiss.                                   |");
     SYSLOG("NicoRed", "| If you've paid for this, you've been scammed. Ask for a refund! |");
     SYSLOG("NicoRed", "| Change the world for the better.                                |");
